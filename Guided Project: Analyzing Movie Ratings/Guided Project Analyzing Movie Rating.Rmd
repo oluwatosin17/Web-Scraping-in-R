@@ -1,0 +1,359 @@
+---
+title: "Guided Project: Analyzing Movie Ratings"
+output: html_notebook
+---
+# Introduction
+
+- Our goal: we want to extract data from the top 30 movies between March and July 2020. We can   extract various details, including a movie's title, description, actors, director, genre,      runtime, and ratings.
+
+- Then, we want to check whether ratings correlate to user votes. For instance, do the           highest-rated movies also have the highest user vote scores?
+
+#Loading the Web Page
+
+# Instructions
+Load the rvest, dplyr, and ggplot2 packages.
+Specify the URL where we'll extract video data.
+To avoid external server instability issues, use this link, which is a copy of the study page on our servers.
+Load the web page content using the read_html() function.
+Save the result as wp_content. We'll use this variable throughout the project.
+
+
+```{r}
+library(dplyr)
+library(rvest)
+library(xml2)
+library(ggplot2)
+
+```
+
+```{r}
+url <- "http://dataquestio.github.io/web-scraping-pages/IMDb-DQgp.html"
+wp_content <- read_html(url)
+
+```
+
+# String Manipulation
+
+The content we extract from web pages is often text (character), so knowing how to manipulate strings is crucial. This screen provides a few important things to keep in mind.
+
+Converting a number as a string into numeric using the as.numeric() function.
+as.numeric("125") # it yields 125 as numeric
+as.numeric(c("5.14", "2.84")) # it yields 5.14 2.84 as numeric
+as.numeric("1,025") # it yields NA instead of 1025
+
+Parsing a string containing a number into numeric using the readr::parse_number() function.
+The command as.numeric("1,025") yields NA because the number 1,025 contains a comma (,), a non-numeric character. To troubleshoot this issue, we can use the readr::parse_number() function. It drops any non-numeric characters and returns the number
+
+readr::parse_number("1,025") # it yields 1025 as numeric
+readr::parse_number(c("3km", "40 mins", "(+2.5)")) # it yields 3.0 40.0  2.5 as numeric
+
+Removing the whitespaces from start and end of string using the stringr::str_trim() function. 
+
+stringr::str_trim("  Remove whitespaces before and after                ") 
+# it yields "Remove whitespaces before and after"
+
+Instructions
+
+Convert "10.50" into numeric.
+Convert the vector c("14.59", "3.14", "55") into numeric.
+Parse the vector c("14 min", "17,35", "(2012)", "1,2,3,4") into numeric.
+Remove whitespaces at the beginning and end of " Spaces before and after should disappear    ".
+
+
+```{r}
+library(readr)
+library(stringr)
+```
+
+```{r}
+parse_number("10.50")
+as.numeric(c("14.59", "3.14", "55"))
+parse_number(c("14 min", "17,35", "(2012)", "1,2,3,4"))
+str_trim(" Spaces before and after should disappear    ")
+```
+#Extracting Elements from Header
+
+data <- content %>% 
+  html_nodes(the_selector) %>% 
+  html_text()
+
+Instructions
+
+Extract the movies' titles.
+
+Find the title CSS selector, and assign the result to a variable.
+Identify the number of elements this selector will select from Selector Gadget.
+Extract the movie titles, combining the html_nodes() and html_text() functions.
+Print the titles vector.
+Extract the movies' years.
+
+Use a process similar to the one we used to extract the titles.
+The year values are wrapped in parentheses that we want to eliminate, and then we want to convert the values from character to numeric data type.
+Print the years vector.
+Compare the number of elements from Selector Gadget with the length of the output vector.
+
+They should be the same.
+
+
+```{r}
+titles <- wp_content %>% 
+  html_nodes(".lister-item-header a") %>% 
+  html_text()
+
+print(titles)
+```
+
+```{r}
+year <- wp_content %>% 
+  html_nodes(".lister-item-year") %>% 
+  html_text()
+year <- parse_number(year)
+print(year)
+
+NROW(year)
+```
+
+
+# Extracting the Movies' Features
+
+When you find the selector, here's the basic code snippet to extract the desired information
+
+data <- content %>% 
+  html_nodes(the_selector) %>% 
+  html_text()
+Instructions
+
+Extract the movies' runtimes.
+
+Find the runtime CSS selector, and assign the result to a variable.
+Identify the number of elements this selector will select from Selector Gadget.
+Extract the movie runtimes, combining the html_nodes() and html_text() functions.
+Convert the runtimes from character to numeric data type because they end with "min" (for minute).
+Print the runtimes vector.
+Extract the movies' genres.
+
+Extract the genres using a similar process as before.
+Remove whitespaces at the end of genre characters.
+Print the genres vector.
+
+
+
+```{r}
+
+runtimes <- wp_content %>% 
+  html_nodes(".runtime") %>% 
+  html_text()
+runtimes <- parse_number(runtimes)
+print(runtimes)
+
+```
+
+```{r}
+ genres <- wp_content %>% 
+  html_nodes(".genre ") %>% 
+  html_text()
+genres <- str_trim(genres)
+print(genres)
+```
+
+#Extracting the Movies' Ratings
+
+When you find the selector, here's the basic code snippet to extract the desired information.
+
+data <- content %>% 
+  html_nodes(the_selector) %>% 
+  html_attr(attribute_name)
+Instructions
+
+Extract the movies' user ratings.
+
+Find the use rating CSS selector and assign the result to a variable.
+Identify the number of elements this selector will select from Selector Gadget.
+Extract the user ratings, combining the html_nodes() and html_attr() functions.
+Convert the user ratings from character to numeric data type.
+Print the user ratings vector.
+Extract the movies' metascores.
+
+Extract the movie metascore using a similar process as before.
+Remove whitespaces at the end of metascores and convert them into numeric data type.
+Print the metascores vector.
+Compare the number of elements from Selector Gadget with the length of the output vector.
+
+They should be the same.
+
+```{r}
+ratings <- wp_content %>% 
+  html_nodes(".ratings-imdb-rating") %>% 
+  html_text()
+ratings <- parse_number(ratings)
+print(ratings)
+NROW(ratings)
+
+```
+
+```{r}
+metascores <-  wp_content %>% 
+  html_nodes(".ratings-metascore") %>% 
+  html_text()
+metascores <- parse_number(str_trim(metascores))
+print(metascores)
+NROW(metascores)
+```
+
+# Extracting the Movie's Vote
+
+When you find the selector, here's the basic code snippet to extract the desired information
+
+data <- content %>% 
+  html_nodes(the_selector) %>% 
+  html_text()
+
+Instructions
+
+Extract the movies' votes.
+
+Find the vote CSS selector, and assign the result to a variable.
+Identify the number of elements this selector will select from Selector Gadget.
+Extract the votes, combining the html_nodes() and html_text() functions.
+Convert the votes from character to numeric data type.
+Print the votes vector.
+Compare the number of elements from Selector Gadget with the length of the output vector.
+
+They should be the same.
+
+
+```{r}
+votes <- wp_content %>% 
+  html_nodes(".sort-num_votes-visible") %>% 
+  html_text()
+votes <- parse_number(votes)
+print(votes)
+NROW(votes)
+```
+
+#Dealing with Missing Values
+
+We've extracted the titles, years, runtimes, genres, user ratings, metascores, and votes from our web page. We can now combine them using the tibble() function. Since we're missing some data, this operation will throw an error.
+
+Exploring the web page again, we notice that the 17th movie is partly the cause of this problem. Furthermore, movies 2, 3, 4, 17, and 29 don't have metascores.
+
+To solve these problems, we'll do the following: - We can introduce NA as missing values and deal with them later if necessary. - We can also remove missing positions from other vectors to get vectors of the same length.
+
+In our case, we'll do the following: - Introduce NA values in the metascores vector. - Remove the 17th element from all the vectors with a length of 30.
+
+Inserting values into a vector is not a trivial operation, so it isn't available in R. We've provided you with the append_vector() function.
+
+
+```{r}
+append_vector <- function(vector, inserted_indices, values){
+
+  ## Creating the current indices of the vector
+  vector_current_indices <- 1:length(vector)
+
+  ## Adding small amount of values (between 0 and 0.9) to the `inserted_indices`
+  new_inserted_indices <- inserted_indices + seq(0, 0.9, length.out = length(inserted_indices))
+
+  ## Appending the `new_inserted_indices` to the current vector indices
+  indices <- c(vector_current_indices, new_inserted_indices)
+
+  ## Ordering the indices
+  ordered_indices <- order(indices)
+
+  ## Appending the new value to the existing vector
+  new_vector <- c(vector, values)
+
+  ## Ordering the new vector wrt the ordered indices
+  new_vector[ordered_indices]
+}
+```
+
+
+Suppose we have a letters vector spanning from A to J where D and H are missing. We can use the append_vector() custom function to either insert NA or the missing values.
+
+
+```{r}
+vector <- c("A", "B", "C", "E", "F", "G", "I", "J") # D and H are missing
+
+# Inserting NA
+append_vector(vector, c(3, 6), NA) 
+
+# Inserting D and H
+append_vector(vector, c(3, 6), c("D", "H"))
+
+
+```
+
+You might see that we indicated the position after which to insert the item. We can also specify several positions and values.
+
+Suppose now we have the same letters vector from A to J where D, E, and H are missing. We can still use the append_vector() custom function to either insert NA or the missing values
+
+
+
+```{r}
+vector <- c("A", "B", "C", "F", "G", "I", "J") # D, E and H are missing
+
+# Inserting NA
+append_vector(vector, c(3, 3, 5), NA) 
+
+# Inserting D and H
+append_vector(vector, c(3, 3, 5), c("D", "E", "H"))
+
+
+```
+
+You might see that we indicated the same position for consecutive insertions. We can also specify several positions and values.
+
+Accordingly, to insert NA into the metascores vector at positions 2, 3, 4, 17, and 29, we have to provide the following positions to our function: 1, 1, 1, 13, and 24. They are the positions after which to insert NA.
+
+Instructions
+
+Copy-paste the append_vector() in your markdown file or your project script.
+
+Use the append_vector() function to insert NA into the metascores vector after the positions 1, 1, 1, 13, and 24.
+
+Save the result back in metascores vector.
+Remove the 17th element from the vectors: titles, years, runtimes, genres, and metascores.
+
+Save the result back to these vectors.
+
+
+
+```{r}
+
+metascores <- append_vector(metascores, c(1,1,1,13,24),NA)
+NROW(metascores)
+
+
+titles <- titles[-17]
+years <- year[-17]
+runtimes <- runtimes[-17]
+genres <- genres[-17]
+metascores <- metascores[-17]
+
+NROW(ratings)
+```
+
+
+# Putting it all together
+
+Instructions
+
+Create a dataframe with the data we previously extracted: titles, years, runtimes, genres, user ratings, metascores, and votes.
+
+Keep only the integer part of the user ratings using the floor() function. For example, 3.4 becomes 3.
+Create a boxplot that shows the number of votes against the user rating.
+
+
+```{r}
+movie_ratings_df <- tibble(titles,years,runtimes,genres,metascores,ratings,votes)
+movie_ratings_df
+
+
+```
+
+```{r}
+ggplot(data = movie_ratings_df, aes(x= ratings, y = votes,group = ratings))+geom_boxplot()
+
+
+```
+We determine that the lowest- and highest-rated films have the lowest and highest votes. There is also a linear correlation between the ratings and votes, on average.
