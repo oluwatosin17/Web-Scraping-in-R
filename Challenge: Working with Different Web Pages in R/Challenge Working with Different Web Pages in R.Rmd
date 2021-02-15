@@ -1,0 +1,291 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+Here is the basic code snippet for scraping a web page.
+
+library(rvest)
+library(dplyr)
+
+content <- read_html("the web page URL")
+
+text <- content %>% 
+    html_nodes("the right selector") %>%
+    html_text()
+    
+
+A brief description: you may have realized that the code to extract data from web pages is usually the same except for a few configurations.
+
+Our goal: we want to write a custom function, called scraper(), that allows us to scrape most websites.
+
+This function receives four parameters (two of which are optional):
+
+The url parameter is the URL of the web page to scrape. This is a required parameter.
+The selector parameter is the CSS selector of the data to extract. This is a required parameter.
+
+The output parameter indicates the type of expected output. This parameter is optional. This type can be any of the following:
+
+"text", (default value)
+"table" (a dataframe)
+"attrs" (all the attribute names and values)
+If output doesn't take one of the three previous values, it represents an attribute's name. For example, output = "href" indicates the attribute href values.
+The all_nodes parameter is set to TRUE if we want to extract all nodes; otherwise, only the first node is necessary. This parameter is optional. Its default value is TRUE.
+
+
+As a reminder, here is a function model that receives two parameters, the second of which is optional.
+
+the_custom_function_name <- function(param_1, param_2 = default_value) {
+    # Performing several operations here
+
+    # Then, return the output
+    the_output_variable_name
+}
+the_custom_function_name <- function(param_1, param_2 = default_value) {
+    # Performing several operations here
+​
+    # Then, return the output
+    the_output_variable_name
+}
+
+Instructions
+
+Write the scraper() function.
+
+The function has the four parameters described in the learning section.
+Load the web page content using the read_html() function and the url parameter.
+Use an if statement to extract one or all nodes:
+
+If all_nodes is TRUE, use the html_nodes() function with the selector parameter.
+Otherwise, use the html_node() function with the selector parameter.
+Use an if statement to extract the following from nodes: text, table, attributes, or attribute data.
+
+If output is "text", use the html_text() function.
+If output is "table", use the html_table() function.
+If output is "attrs", use the html_attrs() function.
+Otherwise, use the html_attr() function with the output parameter.
+Return the extracted data
+
+Use this function to extract the cells of the third row of the table.
+
+Copy-paste the following command after your function to do so.
+scraper(url = "http://dataquestio.github.io/web-scraping-pages/2014_super_bowl.html", 
+        selector = "table tr:nth-child(3) td")
+        
+```{r}
+library(dplyr)
+library(rvest)
+library(xml2)
+```
+      
+        
+        
+```{r}
+scraper <- function(url,selector,output = "text", all_nodes = TRUE) {
+  
+content<- read_html(url)
+
+if(all_nodes){
+all_nodes <- html_nodes
+} else { all_nodes <- html_node }
+  
+  
+ if(output == "text"){
+   
+   output <- html_text()
+ }else if (output == "table"){
+   output <- html_table()
+ }else if (output == "attrs"){
+   output <- html_attrs()
+ }else{output <- html_attr()
+ 
+ }
+ 
+scrape <- content %>% all_nodes(selector) %>% output
+  scrape
+   
+}
+
+
+```
+
+```{r}
+scraper(url = "http://dataquestio.github.io/web-scraping-pages/2014_super_bowl.html", 
+        selector = "table tr:nth-child(3) td")
+```
+
+```{r}
+scrapper(url ="https://www.billboard.com/charts/hot-100/2020-01-04",selector = ".chart-element__information .color--primary")
+```
+```{r}
+scrapper <- function(url,selector,output = "text", all_nodes = TRUE) {
+  # Loading the web page content
+    content <- read_html(url)
+
+    # Getting one or all nodes
+    if (all_nodes) {
+        nodes <- content %>% 
+            html_nodes(selector)
+    } else {
+        nodes <- content %>% 
+            html_node(selector)
+    }
+
+  
+ 
+    if (output == "text") {
+        answer <- nodes %>% html_text()
+    } else if (output == "table") {
+        answer <- nodes %>% html_table()
+    } else if (output == "attrs") {
+        answer <- nodes %>% html_attrs()
+    } else {
+        answer <- nodes %>% html_attr(output)
+    }
+
+   # Returning the output
+   answer 
+}
+
+```
+
+
+Web page description: AccuWeather provides data about past, present, and future weather worldwide. We're interested in the Brussels (Belgium) temperature at the beginning of 2020.
+
+Our goal: we want to extract the high and low temperatures recorded on the 2nd of January 2020.
+
+
+Instructions
+
+Extract the high and low temperatures from this web page as text.
+
+To avoid external servers instability issues, use this link: "http://dataquestio.github.io/web-scraping-pages/Brussels_Belgium_Weather_AccuWeather.html", which is a copy of the study page on our servers.
+Convert this text into numeric data type.
+
+For accuracy from our answer-checker, save these temperatures as belgium_temperatures.
+
+
+```{r}
+r <- scrapper(url = "http://dataquestio.github.io/web-scraping-pages/Brussels_Belgium_Weather_AccuWeather.html", selector = ".half-day-card-header .temperature")
+readr::parse_number(r)
+
+belgium_temperatures <- readr::parse_number(r)
+```
+
+Web page description: we need the Earth's mean radius to compute distances using the longitude and latitude coordinates in our dataset. We discovered that this information is available inside the left information box of the Earth Wikipedia page.
+
+Our
+goal: we want to extract the Earth's mean radius on that page.
+
+Extract the infobox text from this web page.
+
+To avoid external servers instability issues, use this link: "http://dataquestio.github.io/web-scraping-pages/Earth-Wiki.html", which is a copy of the study page on our servers.
+Extract the Earth's mean radius from this text as numeric.
+
+For accuracy from our answer-checker, save these temperatures as earth_mean_radius.
+
+```{r}
+r <- scrapper(url = "http://dataquestio.github.io/web-scraping-pages/Earth-Wiki.html", selector = "#mw-content-text > div.mw-parser-output > table.infobox > tbody > tr:nth-child(20) > td")
+
+readr::parse_number(r)
+
+earth_mean_radius <- readr::parse_number(r)
+
+```
+
+Extract the accepted answer from this web page as text.
+
+To avoid external servers instability issues, use this link: "http://dataquestio.github.io/web-scraping-pages/WebSraping-ethics-SE.html", which is a copy of the study page on our servers.
+We need to extract only one node here.
+For accuracy from our answer-checker, save the result as accepted_message.
+Extract the accepted answer author name from the same web page as text.
+
+To avoid external servers instability issues, use this link: "http://dataquestio.github.io/web-scraping-pages/WebSraping-ethics-SE.html", which is a copy of the study page on our servers.
+We need to extract only one element here.
+For accuracy from our answer-checker, save the result as accepted_message_author.
+
+
+```{r}
+
+r <- scrapper(url = "http://dataquestio.github.io/web-scraping-pages/WebSraping-ethics-SE.html", selector = "#answer-93701 > div > div.answercell.post-layout--right > div.s-prose.js-post-body")
+
+accepted_message <- r
+
+
+
+q <- scrapper(url = "http://dataquestio.github.io/web-scraping-pages/WebSraping-ethics-SE.html", selector = "#answer-93701 > div > div.answercell.post-layout--right > div.mt24 > div > div:nth-child(4) > div > div.user-details > a")
+
+accepted_message_author <- q
+
+
+
+```
+
+
+Instructions
+
+Extract the table from this web page as a dataframe.
+
+To avoid external servers instability issues, use this link "http://dataquestio.github.io/web-scraping-pages/Worldometer-Population.html" which is a copy of the study page on our servers.
+Apply the following operations to the dataframe:
+
+Convert the YearlyChange column into numeric data type.
+Filter the dataframe to include only the rows from 1950 to 2019.
+For accuracy from our answer-checker, save the result as world_population_df_1950_2019.
+Visualize the result using the provided code snippet.
+
+body > div.container > div:nth-child(2) > div.col-md-8 > div > div.table-responsive > table > thead > tr > th:nth-child(1)
+
+```{r}
+
+q <- scrapper(url = "http://dataquestio.github.io/web-scraping-pages/Worldometer-Population.html", selector = "body > div.container > div:nth-child(2) > div.col-md-8 > div > div.table-responsive > table", output = "table", all_nodes = F)
+
+is.data.frame(q)
+
+library(readr)
+q$YearlyChange <- parse_number(q$YearlyChange)
+
+world_population_df_1950_2019 <- q %>%
+  filter(Year >= 1950 & Year <= 2019) 
+world_population_df_1950_2019
+
+```
+
+Web page description: Billboard Hot 100 displays the current Hot 100 songs and other information. Suppose we want to build an image dataset for a machine learning project. In this case, we need to find (many) images. We will extract them from websites.
+
+Our goal: we want to extract the image links from the Hot 100 recorded on January 4, 2020.
+
+The expected result is the links behind the following images:
+
+In the Editor, we provided a regular expression(url_pattern) that you can use to extract URLs from characters.
+
+From the image tag, extract style attribute values from this web page.
+
+To avoid external servers instability issues, use this link: "http://dataquestio.github.io/web-scraping-pages/The%20Hot%20100%20Chart%20_%20Billboard.html", which is a copy of the study page on our servers.
+Select only the first five style attribute values.
+
+From each style attribute value, extract the image URL.
+
+For accuracy from our answer-checker, save this output as hot_5_img_url.
+
+
+```{r}
+
+url_pattern <- "(?i)http[s]?://(?:[a-z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-f][0-9a-f]))+\\.jpg"
+
+hot_100_styledata <- scrapper(url = "http://dataquestio.github.io/web-scraping-pages/The%20Hot%20100%20Chart%20_%20Billboard.html", 
+                             selector = ".chart-element__image", 
+                             output = "style")
+
+
+hot_100_styledata_top5 <- head(hot_100_styledata, 5)
+
+hot_100_styledata_top5
+
+library(stringr)
+hot_5_img_url <- str_extract(hot_100_styledata_top5,url_pattern)
+
+```
+
