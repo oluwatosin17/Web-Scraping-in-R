@@ -1,0 +1,306 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Instructions
+
+Load the rvest and dplyr packages. Remember that importing rvest also imports the xml2 package.
+
+Use read_html() to load the page "http://dataquestio.github.io/web-scraping-pages/simple_classes.html".
+
+Assign the result to content_1.
+Extract the content inside the b tag.
+
+Assign the result to b_text.
+
+```{r}
+library(rvest)
+library(dplyr)
+library(xml2)
+
+content_1 <- read_html("http://dataquestio.github.io/web-scraping-pages/simple_classes.html")
+
+b_text <- content_1 %>% html_nodes("b") %>% html_text()
+b_text
+
+
+```
+
+Cascading Style Sheets, or CSS, is a language for adding styles to HTML pages. You may have noticed that our simple HTML pages from the past few screens didn't have any styling (all of the paragraphs had black text and the same font size). Most Web pages use CSS to display a lot more than basic black text.
+
+This CSS will make the text inside all paragraphs red:
+
+p{
+    color: red
+ }
+
+
+This CSS will change the text color to red for any paragraphs that have the class inner-text. We select classes with the period or dot symbol (.):
+
+p.inner-text{
+    color: red
+ }
+ 
+ 
+ We can also style IDs and classes without using any specific tags. For example, this CSS will make the element with the ID first red (not just paragraphs):
+
+#first{
+    color: red
+ }
+This CSS will make any element with the class inner-text red:
+
+.inner-text{
+    color: red
+ }
+
+In the examples above, we used CSS selectors to select one or more elements and then apply styles to only those elements. CSS selectors are very powerful and flexible.
+
+As you can see tag_name, .class_name, and #ID_name that we used in the previous mission in the html_nodes() function are CSS selectors. Hence, we use CSS selectors to select elements when we do web scraping.
+
+
+Instructions
+Learn
+
+Here's the HTML we'll work with on this screen:
+
+HTML code example
+You may have noticed that the same element can have both an ID and a class. We can also assign multiple classes to a single element. We'll separate the classes with spaces.
+
+Look at the web page that corresponds to that example.
+
+As a reminder, let's use CSS selector to select the content we want.
+
+Instructions
+
+Use read_html() to load the page "http://dataquestio.github.io/web-scraping-pages/ids_and_classes.html".
+
+Assign the result to content_2.
+Use the CSS Selector to get the first outer paragraph.
+
+Assign the result to first_outer_text.
+Use the CSS Selector to get the first inner and outer paragraphs.
+
+Assign the result to first_items_text.
+
+
+
+```{r}
+
+content_2 <- read_html("http://dataquestio.github.io/web-scraping-pages/ids_and_classes.html")
+
+first_outer_text <- content_2 %>% html_nodes("#second") %>% html_text
+first_outer_text
+
+first_items_text <- content_2 %>% html_nodes(".first-item") %>% html_text()
+first_items_text
+
+
+```
+
+We can nest CSS selectors similar to the way HTML nests tags. For example, we could use selectors to find all of the paragraphs inside the body tag. Nesting is a powerful technique that uses CSS for complex web scraping tasks.
+
+This selector will target any paragraph inside a div tag:
+
+div p
+This selector will target any item inside a div tag that has the class first-item:
+
+div .first-item
+This one is even more specific. It selects any item that's inside a div tag inside a body tag, but only if it also has the ID first:
+
+body div #first
+This selector will target any items with the ID first that are inside any items with the class first-item:
+
+.first-item #first
+
+We can nest CSS selectors in infinite ways. This allows us to extract data from websites with complex layouts.
+
+
+Instructions
+
+The URL of the example is "http://dataquestio.github.io/web-scraping-pages/2014_super_bowl.html".
+
+Find the Total Plays for the New England Patriots.
+
+Use the CSS selector to get the Total Plays row cells.
+Index the third element of the output vector.
+
+Assign the result to patriots_total_plays_count.
+Find the Total Yards for the Seahawks.
+
+Use the same technique as in the previous instruction.
+Assign the result to seahawks_total_yards_count.
+
+
+```{r}
+content_3 <- read_html("http://dataquestio.github.io/web-scraping-pages/2014_super_bowl.html")
+table <- content_3 %>% html_nodes("table") %>% html_table()
+
+
+table <- content_3 %>% html_nodes("#team_stats") %>% html_table()
+table
+
+table <- as.data.frame(table)
+patriots_total_plays_count <- table[5,3]
+
+seahawks_total_yards_count <- table[2,1]
+
+
+```
+
+```{r}
+content_3 <- read_html("http://dataquestio.github.io/web-scraping-pages/2014_super_bowl.html")
+
+total_plays <- content_3 %>% 
+    html_nodes("#total-plays td") %>%
+    html_text()
+
+patriots_total_plays_count <- total_plays[3]
+
+total_plays
+
+total_yards <- content_3 %>% 
+    html_nodes("#total-yards td") %>%
+    html_text()
+
+seahawks_total_yards_count <- total_yards[2]
+
+seahawks_total_yards_count
+```
+ 
+
+Retrieve the expected data programmatically. This solution assumes that we understand the web page's structure.
+Use a tool to find the suitable selector.
+In practice, we often find ourselves combining both approaches — especially since most people won't give you the code for their pages as we have done here for the sake of education and simplicity. We have to try to understand web pages' structures by ourselves.
+
+
+One of the challenges was to find the Total Plays for the New England Patriots. To do so, we used the nested selector #total-plays td to get the Total Plays row cells. Then, we indexed the third element of the output vector.
+
+
+```{r}
+content_3 <- read_html("http://dataquestio.github.io/web-scraping-pages/2014_super_bowl.html")
+
+total_plays <- content_3 %>% 
+    html_nodes("#total-plays td") %>%
+    html_text()
+
+patriots_total_plays_count <- total_plays[3]
+
+# patriots_total_plays_count equals to 72
+
+```
+
+Accessing the third cell by indexing the output vector (total_plays[3]) is a programming solution. Otherwise, we could have used the :nth-child(element_position) selector to get the result directly.
+
+
+```{r}
+patriots_total_plays_count <- content_3 %>% 
+    html_nodes("#total-plays td:nth-child(3)") %>%
+    html_text()
+
+# patriots_total_plays_count equals to 72
+patriots_total_plays_count
+
+
+```
+
+If we don't know how to properly nest the selectors, we can stack several html_nodes() like this:
+
+```{r}
+patriots_total_plays_count <- content_3 %>% 
+    html_nodes("#total-plays") %>%
+    html_nodes("td:nth-child(3)") %>%
+    html_text()
+patriots_total_plays_count
+
+
+```
+
+In this code snippet, html_nodes("#total-plays") selects all nodes with total-plays ID, then html_nodes("td:nth-child(3)") selects the third elements in these nodes. It is equivalent to html_nodes("#total-plays td:nth-child(3)").
+
+Typically, there is a selector for everything you might want to extract, but sometimes it can be quite complex. In these cases, you have to think about programming solutions.
+
+
+Instructions
+
+The content_3 variable is available from previous screens.
+
+Extract all information about the New England Patriots (NWE).
+
+Use the CSS selector to get the table as a dataframe.
+Name this dataframe table_df.
+Extract the NWE column data from the table_df dataframe using the $ operator.
+
+Assign the result to nwe_vector.
+
+```{r} 
+th <- content_3 %>% html_node("table")  %>%
+    html_table()
+
+nwe_vector <- th$NWE
+
+nwe_vector
+
+```
+
+
+Basically, two kinds of tools are useful for scraping web pages:
+
+A tool to display the web page HTML code and its structure, such as Browser Developer Tools
+A tool to test the selectors directly on the web page to scrape
+Every modern web browser includes a powerful suite of developer tools. These tools can help you inspect currently loaded HTML and understand its structure.
+
+With Chrome, we can double-click on the page and select inspect.
+With Safari, Go to Preferences > Advanced and then check "Show Develop menu in menu bar".
+With Mozilla Firefox, we can double-click on the page and select inspect element.
+
+
+
+
+The second tool we'll use is Selector Gadget. It generates and discovers selectors in web pages. 
+.text--peak , .text--week , .text--last , .text--uppercase , .color--primary
+
+
+```{r}
+content_hot_100 <- read_html("https://www.billboard.com/charts/hot-100/2020-01-04")
+
+hot_100_week_on_chart <- content_hot_100 %>% 
+    html_nodes(".color--secondary .text--week") %>%
+    html_text() %>%
+    head(10)
+
+hot_100_week_on_chart
+
+content_hot_100 <- read_html("https://www.billboard.com/charts/hot-100/2020-01-04")
+
+hot_100_peak_on_chart <- content_hot_100 %>% 
+    html_nodes(".color--secondary .text--peak") %>%
+    html_text() %>%
+    head(10)
+
+hot_100_peak_on_chart
+
+```
+
+
+Instructions
+
+The content_hot_100 variable is available in the Editor.
+
+Extract the titles of the top ten songs using the selector, .chart-element__information .color--primary.
+
+Assign the result to hot_100_top_10_songs
+
+
+```{r}
+content_hot_100 <- read_html("https://www.billboard.com/charts/hot-100/2020-01-04")
+
+# Type 
+
+hot_100_top_10_songs <- content_hot_100 %>% html_nodes(".chart-element__information .color--primary") %>% html_text() %>% head(10)
+
+hot_100_top_10_songs
+
+
+```
+.display--flex:nth-child(1) .sort--this-week .color--primary , .display--flex+ .display--flex .sort--this-week .chart-element__information , .color--secondary
