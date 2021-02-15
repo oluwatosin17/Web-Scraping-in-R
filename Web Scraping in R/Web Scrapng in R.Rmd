@@ -1,0 +1,288 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+Web pages use HyperText Markup Language (HTML). HTML isn't a programming language like R or Python. Rather, it's a markup language with its own syntax and rules. When a web browser like Safari, Chrome, or Firefox downloads a web page, it reads the HTML to determine how to render and display it.
+
+Instructions
+
+Make a GET request to http://dataquestio.github.io/web-scraping-pages/simple.html.
+
+Assign the result to the variable response.
+Use the content() function to get the content of response as plain text.
+
+Assign the result to content.
+Print content and note the similarity to the HTML above.
+
+```{r}
+library(httr)
+response <- GET("http://dataquestio.github.io/web-scraping-pages/simple.html")
+content<- content(response)
+print(content)
+```
+
+Downloading the page is the easy part. On the previous screen, we combined the GET() and content() functions from the httr package.
+
+response  <-  GET("http://dataquestio.github.io/web-scraping-pages/simple.html")
+content  <- content(response)
+print(content)
+This yields an HTML document.
+
+{html_document}
+<html>
+[1] <head>\n<meta http-equiv="Content-Type" content="text/html; charset=UTF-8 ...
+[2] <body>\n        <p>Here is some simple content for this page.</p>\n    </ ...
+If we want to extract specific information from this HTML document, we need to parse the HTML document and extract the information.
+
+Now, the rvest package comes into play. The httr package allowed querying and manipulating APIs. The rvest package allows parsing and extracting tags from an HTML document.
+
+Importing rvest also imports the xml2 package, which contains the read_html() function that combines the GET() and content() functions. This function receives a URL link and yields its content as an HTML document.
+
+```{r}
+library(xml2)
+```
+
+
+```{r}
+library(rvest)
+new_content <- read_html("http://dataquestio.github.io/web-scraping-pages/simple.html")
+print(new_content)
+```
+
+{html_document}
+<html>
+[1] <head>\n<meta http-equiv="Content-Type" content="text/html; charset=UTF-8 ...
+[2] <body>\n        <p>Here is some simple content for this page.</p>\n    </ ...
+3. From httr to rvest
+
+If we want to get the text (content) in the p tag element from the HTML document contained in new_content, we use the following code snippet.
+
+```{r}
+library(dplyr)
+p_text <- new_content %>% 
+    html_nodes("p") %>%
+    html_text()
+print(p_text)
+```
+
+The output looks like this:
+
+The html_nodes() function extracts all p tag elements. Its syntax is: html_nodes("the name of the tag").
+The html_text() function extracts the text (the content) from the p tag elements.
+Note the use of pipes (%>%) for cascade operations.
+
+
+
+Instructions
+
+Get the text inside the title tag.
+
+Assign the result to title_text
+
+
+```{r}
+
+new_content <- read_html("http://dataquestio.github.io/web-scraping-pages/simple.html")
+title_text <- new_content %>% 
+    html_nodes("title") %>%
+    html_text()
+print(title_text)
+# Type your answer below
+
+
+```
+
+
+
+Let's consider a new example(http://dataquestio.github.io/web-scraping-pages/simple_classes.html). The b tag creates bold text, and the div tag creates a divider that splits the page into units. We can think of a divider as a "box" that contains content. For example, different dividers hold a web page's footer, sidebar, and horizontal menu.
+
+```{r}
+library(dplyr)
+content_2 <- read_html("http://dataquestio.github.io/web-scraping-pages/simple_classes.html")
+p_text <- content_2 %>% 
+    html_nodes("p") %>%
+    html_text()
+print(p_text)
+```
+
+Instructions
+
+We've provided the code to get content_2 in the Editor.
+
+Get all occurrences of text inside the b tag.
+
+Assign the result to b_text.
+Extract the first outer paragraph from b_text.
+
+Assign the result to the first_outer_paragraph variable.
+
+```{r}
+content_2 <- read_html("http://dataquestio.github.io/web-scraping-pages/simple_classes.html")
+
+# Type your answer below
+
+b_text <- content_2 %>%  html_nodes("b") %>% html_text()
+first_outer_paragraph <- b_text[1]
+first_outer_paragraph
+
+
+```
+Alternatively, we can access content by IDs. HTML allows elements to have IDs. Because IDs are unique, we can use them to refer to specific elements. In our example, we assign the "first" ID to the first paragraph and "second" ID to the second one using attributes.
+
+Attributes contain extra information about the element that we don't want to appear in the actual content. Here, we don't want IDs information to appear in the p tag content.
+
+
+To access the IDs, we can still use the html_nodes() function. However, instead of indicating the tag name, we provide the ID name preceded by #.
+
+For our example, we can use html_nodes("#first") to get the first paragraph's text using the first ID.
+
+Let's use this method to access the first and second paragraphs.
+
+Instructions
+
+We've loaded the example for you and saved it as content_3.
+
+Get the text of the first paragraph using the first ID.
+
+Assign the result to first_paragraph_text.
+Get the text of the first paragraph using the second ID.
+
+Assign the result to second_paragraph_text.
+
+```{r}
+content_3 <- read_html("http://dataquestio.github.io/web-scraping-pages/simple_ids.html")
+
+# Type your answer below
+
+first_paragraph_text <- content_3 %>%  html_nodes("#first") %>% html_text()
+first_paragraph_text
+
+
+second_paragraph_text <- content_3 %>% html_nodes("#second") %>% html_text()
+second_paragraph_text
+
+
+```
+
+
+To access the classes, we can still use the html_nodes() function. However, instead of indicating the tag name, we provide the class name preceded by a period (.).
+
+In our example, we can use html_nodes(".inner-text") to get the text of the "inner" paragraphs using the inner-text class.
+
+Let's use this method to access the outer paragraphs.
+
+
+To access the classes, we can still use the html_nodes() function. However, instead of indicating the tag name, we provide the class name preceded by a period (.).
+
+In our example, we can use html_nodes(".inner-text") to get the text of the "inner" paragraphs using the inner-text class.
+
+Let's use this method to access the outer paragraphs.
+
+Instructions
+
+We've loaded the example for you and saved it as content_4.
+
+Get the text of the outer paragraphs using the outer-text class.
+
+Assign the result to outer_paragraph_text.
+
+```{r}
+content_4 <- read_html("http://dataquestio.github.io/web-scraping-pages/simple_classes.html")
+
+# Type your answer below
+
+outer_paragraph_text <- content_4 %>% html_nodes(".outer-text") %>% html_text()
+outer_paragraph_text
+
+
+```
+
+Note that we use html_node() instead of html_nodes() because there is only one table to extract. If there are several tables in the page and we use html_node(), we will only extract the first table.
+
+However, we want to get a dataframe instead of text. We can't use html_text() anymore. Luckily, rvest provides the html_table() function for this purpose.
+
+Let's use this function to get the dataframe representing the table from our example.
+
+Instructions
+
+We've loaded the example for you and saved it as content_5.
+
+Get the dataset inside the first and unique table tag.
+
+Select the data inside the table tag.
+Replace the html_text() function by html_table().
+Assign the result to super_bowl_df.
+```{r}
+
+content_5 <- read_html("http://dataquestio.github.io/web-scraping-pages/2014_super_bowl.html")
+
+
+table_text <- content_5 %>% 
+    html_node("table") %>%
+    html_text()
+
+print(table_text)
+
+super_bowl_df <- content_5 %>% html_node("table") %>% html_table
+super_bowl_df
+
+```
+
+Sometimes the information we're looking for isn't the content of elements but attribute values—for example, the list of classes or IDs in the extracted nodes.
+
+Assume that we got the content of this example and stored it in the variable content_6. We can use the html_attrs() function instead of html_text() to extract all attributes values.
+
+
+```{r}
+content_6 <- read_html("http://dataquestio.github.io/web-scraping-pages/ids_and_classes.html")
+
+p_attrs <- content_6 %>% 
+    html_nodes("p") %>%
+    html_attrs()
+
+print(p_attrs)
+
+
+
+
+```
+This output shows all the classes and IDs that we have in p tag elements.
+
+We can also get specific attribute values using html_attr("name_of_attribute"). For example, we can extract the list of IDs by doing the following:
+
+```{r}
+p_attr_id <- content_6 %>% 
+    html_nodes("p") %>%
+    html_attr("id")
+
+print(p_attr_id)
+
+
+```
+
+The NA represents missing values, indicating that some nodes don't have IDs.
+
+In short, if we have a tag node obtained from html_nodes(), we can apply either html_attrs() to get all the attributes and their values or html_attr() specifying an attribute name to get its values.
+
+
+Instructions
+
+We've loaded the example for you and saved it as content_6.
+
+Extract the list of the class attribute value in the p tag.
+
+Select the element inside the p tag.
+Use the html_attr() function to get the class attribute values.
+Assign the result to p_class_values.
+
+
+
+```{r}
+p_class_values <- content_6 %>% html_nodes("p") %>% html_attr("class")
+p_class_values
+
+
+```
+
